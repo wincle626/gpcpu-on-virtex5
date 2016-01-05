@@ -1,0 +1,4 @@
+- 5 stage RISC pipelined processor
+- with instruction cache
+- instruction cache - state machine - distributed ram
+- ID reg_file - block ram

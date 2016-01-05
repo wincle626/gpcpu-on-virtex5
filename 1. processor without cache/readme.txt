@@ -1,0 +1,4 @@
+- 5 stage RISC pipelined processor
+- without cache
+- multi cycle ID
+- distributed ram in ID

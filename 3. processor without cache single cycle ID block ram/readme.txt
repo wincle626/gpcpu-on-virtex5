@@ -1,0 +1,3 @@
+- 5 stage RISC pipelined processor
+- without cache
+- block ram ID

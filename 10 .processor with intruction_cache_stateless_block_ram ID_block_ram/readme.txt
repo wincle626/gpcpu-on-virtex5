@@ -1,0 +1,5 @@
+- 5 stage RISC pipelined processor
+- with instruction cache
+- instruction cache - stateless- block ram
+- ID reg_file - block ram
+- more optimized new exe
