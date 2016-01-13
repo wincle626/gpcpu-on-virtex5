@@ -1,0 +1,1256 @@
+.org 0x10000000
+
+
+ldil $0 ,0xFFFF ;FOR FILLING THE RAM
+ldih $0 ,0xFFFF ;FOR FILLING THE RAM
+
+ldil $1 ,0x0000 ;Starting Address
+ldih $1 ,0x0010
+
+ldil $2 ,0x00FC ;Starting Address
+ldih $2 ,0x0010
+
+ldil $4 ,0x0004 ;Address Difference
+ldih $4 ,0x0000 ;Address Difference
+
+st.w $0,($1)
+
+Fill_Routine:
+add $1 ,$1, $4
+sub $3,$2,$1
+st.w $0,($1)
+bnz  Fill_Routine,$3  
+
+
+;--------------------T.E.S.T 0 ------------------
+; ; test for "ADD" using reg 0,1,2,3,4,5,28,29
+;------------------------------------------------
+
+test0:
+ldil $0 ,0x0001 ;FILLING THE RAM
+ldih $0 ,0x0000 ;FILLING THE RAM
+
+ldil $29 ,0xF0CE ;FILLING THE RAM
+ldih $29 ,0xF0CE ;FILLING THE RAM
+
+ldil $28 ,0x0000 ;Loading the Starting Address
+ldih $28 ,0x0010
+
+ldil $1 ,0x0001 ;Loading the 1st OP
+ldih $1 ,0x0000
+
+ldil $2 ,0x0001 ;Loading the 2nd OP
+ldih $2 ,0x0000
+
+ldil $4 ,0x0002 ;Loading the EXP result
+ldih $4 ,0x0000
+
+ldil $5 ,0x0001 ;Check Reg
+ldih $5 ,0x0000
+
+add $3,$2,$1
+sub $5,$4,$3
+bz correct , $5
+st.w $29,($28)
+bra end0
+
+correct:
+st.w $0,($28)
+end0:
+
+
+;--------------------T.E.S.T 1 ------------------
+; ; test for "SHIFTING LEFT" SAL using reg 5,6,7,8,9
+; ; Using SAL with +ve shifting 
+;------------------------------------------------
+test1:     
+ldil $28 ,0x0004 ;Loading the 2nd Address
+ldih $28 ,0x0010
+
+ldil $5 , 0x0001
+ldih $5 , 0x0000
+
+ldil $6 , 0x0002
+ldih $6 , 0x0000
+
+;expected value is 4
+ldil $8 , 0x0004
+ldih $8 , 0x0000
+
+sal $7,$5,$6 ;shifitng 5 as the value in 6
+sub $9,$7,$8
+bz correct1 , $9
+st.w $29,($28)
+bra end1
+
+correct1:
+st.w $0,($28)
+end1:
+
+
+;--------------------T.E.S.T 2 ------------------
+; ; test for "SHIFTING LEFT" SAL using reg 5,6,7,8,9
+; ; Using SAL with -ve shifting 
+;------------------------------------------------
+
+test2:     
+ldil $28 ,0x0008 ;Loading the 3rd Address
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFA ; loading -6
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFA ; loading -ve 6
+ldih $6 , 0xFFFF
+
+;expected value is -1
+ldil $8 , 0xFFFF
+ldih $8 , 0xFFFF
+
+sal $7,$5,$6 ;shifitng $5 as much as the value in 6 i.e -ve6
+sub $9,$7,$8
+bz correct2 , $9
+st.w $29,($28)
+bra end2
+
+correct2:
+st.w $0,($28)
+
+end2:
+
+;--------------------T.E.S.T 3 ------------------
+; ; test for "SHIFTING Arithmatic RIGHT " using reg 5,6,7,8,9
+; ; Using SAR with +ve shifting 
+;------------------------------------------------
+
+test3:     
+ldil $28 ,0x000C ;Loading the 4th Address
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFA ; loading -6
+ldih $5 , 0xFFFF
+
+ldil $6 , 0x0001 ;Shifting 1 time
+ldih $6 , 0x0000
+
+;expected value is -3
+ldil $8 , 0xFFFD
+ldih $8 , 0xFFFF
+
+sar $7,$5,$6 ;shifitng $5 as much as the value given
+sub $9,$7,$8
+bz correct3 , $9
+st.w $29,($28)
+bra end3
+
+correct3:
+st.w $0,($28)
+
+end3:
+
+;--------------------T.E.S.T 4 ------------------
+; ; test for "SHIFTING ARITHMATIC RIGHT" using reg 5,6,7,8,9
+; ; Using SAR with -ve shifting 
+;------------------------------------------------
+test4:     
+ldil $28 ,0x0010 ;Loading the 5th Address
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFA ; loading -6
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFF ; loading -1
+ldih $6 , 0xFFFF
+
+;expected value is -12
+ldil $8 , 0xFFF4
+ldih $8 , 0xFFFF
+
+sar $7,$5,$6 ;shifitng $5 as much as the value in $6
+sub $9,$7,$8
+bz correct4 , $9
+st.w $29,($28)
+bra end4
+
+correct4:
+st.w $0,($28)
+
+end4:
+
+;--------------------T.E.S.T 5 ------------------
+; ; test for "AND" using reg 5,6,7,8,9
+; ;------------------------------------------------
+
+test5:     
+ldil $28 ,0x0014 ;Loading the 6th Address
+ldih $28 ,0x0010
+
+ldil $5 , 0x0000 ; loading the 16 MSBSwith highs and lsbs with lows
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFF ; loading the 16 MSBS with lows and lsbs with highs
+ldih $6 , 0x0000
+
+;expected value is 0000 0000 
+ldil $8 , 0x0000
+ldih $8 , 0x0000
+
+and $7,$5,$6 ;ANDing both reg
+sub $9,$7,$8
+bz correct5 , $9
+st.w $29,($28)
+bra end5
+
+correct5:
+st.w $0,($28)
+
+end5:
+
+;--------------------T.E.S.T 6 ------------------
+; ; test for "OR" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test6:     
+ldil $28 ,0x0018 ;Loading the 7th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0x0000 ; loading the 16 MSBSwith highs and lsbs with lows
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFF ; loading the 16 MSBS with lows and lsbs with highs
+
+ldih $6 , 0x0000
+
+;expected value is FFFF FFFF 
+ldil $8 , 0xFFFF
+
+ldih $8 , 0xFFFF
+
+or $7,$5,$6 ;ORing both reg
+
+
+sub $9,$7,$8
+
+
+bz correct6 , $9
+
+st.w $29,($28)
+
+bra end6
+
+
+correct6:
+st.w $0,($28)
+
+end6:
+
+;--------------------T.E.S.T 7 ------------------
+; ; test for "NOT" using reg 5,6,7,8,9
+; ;------------------------------------------------
+
+test7:     
+ldil $28 ,0x001C ;Loading the 8th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0x0000 ; loading the 16 MSBSwith highs and lsbs with lows
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFF ; NOT USED
+
+ldih $6 , 0x0000
+
+;expected value is 0000 FFFF 
+ldil $8 , 0xFFFF
+
+ldih $8 , 0x0000
+
+not $7,$5 ;NOTing
+
+
+sub $9,$7,$8
+
+
+bz correct7 , $9
+
+st.w $29,($28)
+
+bra end7
+
+
+correct7:
+st.w $0,($28)
+
+end7:
+
+;--------------------T.E.S.T 8 ------------------
+; ; test for "JMP" using reg 5,6,7,8,9
+; ;------------------------------------------------
+
+
+
+test8:     
+ldil $28 ,0x0020 ;Loading the 9th Address
+
+ldih $28 ,0x0010
+
+
+ldil $5 , 0x0254 ;318 ; Loading the adress of label CORRECT8 i.e 0x10000510
+
+ldih $5 , 0x1000
+
+
+jmp $5
+
+
+ldil $6 , 0xFFFF ; irrelevent
+
+ldih $6 , 0x0000
+
+;expected value is irrelevent
+ldil $8 , 0xFFFF
+
+ldih $8 , 0x0000
+
+not $7,$5 ;NOTing
+
+
+sub $9,$7,$8
+
+
+bz correct8 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end8
+nop
+
+correct8:
+st.w $0,($28)
+nop
+nop
+
+end8:
+
+;--------------------T.E.S.T 9 ------------------
+; ; test for "BRA" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test9:     
+ldil $28 ,0x0024 ;Loading the 10th Address
+
+ldih $28 ,0x0010
+
+bra correct9
+nop
+
+
+ldil $5 , 0x051C ; irrelevent
+
+ldih $5 , 0x1000
+
+
+jmp $5
+
+
+ldil $6 , 0xFFFF ; irrelevent
+
+ldih $6 , 0x0000
+
+;expected value is irrelevent
+ldil $8 , 0xFFFF
+
+ldih $8 , 0x0000
+
+not $7,$5 ;irrelevent
+
+
+sub $9,$7,$8
+
+
+bz correct9 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end9
+nop
+
+correct9:
+st.w $0,($28)
+nop
+nop
+
+end9:
+
+;--------------------T.E.S.T 10 ------------------
+; ; test for "BL" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test10:     
+ldil $28 ,0x0028 ;Loading the 11th Address
+
+ldih $28 ,0x0010
+
+bl $5, correct10 ; it should save 0x100005D4 in $5 that is the add of next instruction
+nop
+
+
+
+
+bz correct10 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end9
+nop
+
+correct10:
+ldil $6 ,0x02c8 ;38c ;Loading the saved Address of PC to check if PC landed where it should and Saved the Right adress
+
+ldih $6 ,0x1000
+
+
+
+sub $7,$5,$6
+
+
+bz correct10_1 , $7
+nop
+st.w $29,($28)
+nop
+nop
+bra end10
+nop
+
+
+
+correct10_1:
+st.w $0,($28)
+nop
+nop
+
+end10:
+
+;--------------------T.E.S.T 11 ------------------
+; ; test for "ADDing with -ve Op" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test11:     
+ldil $28 ,0x002C ;Loading the 12th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFE ; loading -2
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFE ; loading -2
+
+ldih $6 , 0xFFFF
+
+;expected value is FFFF FFFC  -4
+ldil $8 , 0xFFFC
+
+ldih $8 , 0xFFFF
+
+add $7,$5,$6
+
+
+sub $9,$7,$8
+
+
+bz correct11 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end11
+nop
+
+
+correct11:
+st.w $0,($28)
+nop
+nop
+
+end11:
+
+;--------------------T.E.S.T 12 ------------------
+; ; test for "ADDing with -ve" using reg 5,6,7,8,9
+; ; Checking overflow
+; ------------------------------------------------
+
+test12:     
+ldil $28 ,0x0030 ;Loading the 13th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFF ; loading -1
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0x0001 ; loading 1
+
+ldih $6 , 0x0000
+
+;expected value is 0000 0000  0
+ldil $8 , 0x0000
+
+ldih $8 , 0x0000
+
+add $7,$5,$6
+
+
+sub $9,$7,$8
+
+
+bz correct12 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end12
+nop
+
+
+correct12:
+st.w $0,($28)
+nop
+nop
+
+end12:
+
+;--------------------T.E.S.T 13 ------------------
+; ; test for "ADDing with -ve" using reg 5,6,7,8,9
+; ; Checking overflow
+; ------------------------------------------------
+
+test13:     
+ldil $28 ,0x0034 ;Loading the 14th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFF ; loading -1
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0xFFFF ; loading -2
+
+ldih $6 , 0xFFFF
+
+;expected value is FFFF FFFE
+ldil $8 , 0xFFFE
+
+ldih $8 , 0xFFFF
+
+add $7,$5,$6
+
+
+sub $9,$7,$8
+
+
+bz correct13 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end13
+nop
+
+
+correct13:
+st.w $0,($28)
+nop
+nop
+
+end13:
+
+;--------------------T.E.S.T 14 ------------------
+; ; test for "CALL" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test14:     
+ldil $28 ,0x0038 ;Loading the 15th Address
+
+ldih $28 ,0x0010
+
+ldil $6 ,0x0440 ;504 ;Loading the Address of place where to jump
+
+ldih $6 ,0x1000
+
+
+call $5, $6 ; it should save 0x100007ec in $5 that is the addr of next instruction and should jump to the instruction at ($6)
+nop
+
+bz correct14 , $9
+nop
+
+st.w $29,($28)
+nop
+nop
+
+bra end9
+nop
+
+correct14:
+ldil $6 ,0x0420 ;4e4 ;Loading the saved Address of PC to check if PC landed where it should and Saved the Right adress
+
+ldih $6 ,0x1000
+
+
+
+sub $7,$5,$6
+
+
+bz correct14_1 , $7
+nop
+st.w $29,($28)
+nop
+nop
+bra end14
+nop
+
+
+
+correct14_1:
+st.w $0,($28)
+
+
+end14:
+
+; -------------------T.E.S.T 15 ------------------
+; ; test for "ADD a,a,a" using reg 5,6,7,8,9
+; ; Checking overflow
+; ------------------------------------------------
+
+test15:     
+ldil $28 ,0x003C ;Loading the 16th Address
+ldih $28 ,0x0010
+
+;expected value is FFFF FFFE -2
+ldil $8 , 0xFFFE
+
+ldih $8 , 0xFFFF
+
+ldil $5 , 0xFFFF ; loading -1
+
+ldih $5 , 0xFFFF
+
+
+add $5,$5,$5
+
+
+sub $9,$5,$8
+
+
+bz correct15 , $9
+
+st.w $29,($28)
+
+
+bra end15
+
+
+correct15:
+st.w $0,($28)
+
+end15:
+
+; --------------------T.E.S.T 16 -----------------
+;  test for "Store After load with Displcment addr" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+
+test16:     
+ldil $28 ,0x0040 ;Loading the 17th Address
+
+ldih $28 ,0x0010
+
+;expected value is FOCE FOCE 
+ldil $8 , 0xF0ce
+
+ldih $8 , 0xF0ce
+
+ldil $5 , 0x0000 ; loading the base address
+
+ldih $5 , 0x1100
+
+
+st.w $8,0x4($5) ; saving "FOCEFOCE" at the address $5 + 4 i.e 0x11000004
+
+ld.w $6 ,0x4($5) ; loading the data from the address $5 + 4 i.e 0x11000004 and content "FOCEFOCE"
+
+
+sub $9,$6,$8 ; subtracting the expected address with the recived address 
+
+
+bz correct16 , $9
+
+st.w $29,($28)
+
+bra end16
+
+
+correct16:
+st.w $0,($28)
+
+end16:
+
+; --------------------T.E.S.T 17 -----------------
+; ; test for "Jump After load " using reg 5,6,7,8,9
+; ------------------------------------------------
+
+
+test17:     
+ldil $28 ,0x0044 ;Loading the 18th Address
+
+ldih $28 ,0x0010
+
+;expected value. REG NOT USED
+ldil $8 , 0xF0ce
+
+ldih $8 , 0xF0ce
+
+ldil $7 , 0xF0ce ;loading some garbage data
+
+ldih $7 , 0xF0ce
+
+ldil $5 , 0x0000 ; loading the base address
+
+ldih $5 , 0x1100
+
+ldil $6 , 0x0000 ; loading the contents to write at the address
+
+ldih $6 , 0x0000
+
+
+st.w $6,($5) ; saving "0x00000000" at the address $5  i.e 0x11000000
+
+ld.w $7 ,($5) ; loading the data from the address $5  i.e 0x11000000 and content "0x0"
+
+
+bz correct17 , $7
+
+st.w $29,($28)
+
+bra end17
+
+correct17:
+st.w $0,($28)
+
+end17:
+
+; --------------------T.E.S.T 18 -----------------
+; ; test for "Store After load with Displcment addr" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test18:     
+ldil $28 ,0x0048 ;Loading the 17th Address
+
+ldih $28 ,0x0010
+
+;expected value is FOCE FOCE 
+ldil $8 , 0xF0ce
+
+ldih $8 , 0xF0ce
+
+ldil $5 , 0x0008 ; loading the base address 0x11000008
+
+ldih $5 , 0x1100
+
+
+st.w $8,0xFFFC($5) ; saving "FOCEFOCE" at the address $5 - 4 i.e 0x11000004
+
+ld.w $6 ,0xFFFC($5) ; loading the data from the address $5 - 4 i.e 0x11000004 and content "FOCEFOCE"
+
+
+sub $9,$6,$8 ; subtracting the expected address with the recived address 
+
+
+bz correct18 , $9
+
+st.w $29,($28)
+
+bra end18
+
+
+correct18:
+st.w $0,($28)
+
+end18:
+
+; --------------------T.E.S.T 19 -----------------
+; ; test for "ADDI" using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test19:     
+ldil $28 ,0x004C ;Loading the 19th Address
+
+ldih $28 ,0x0010
+
+
+ldil $5 , 0x0008 ; 
+
+ldih $5 , 0x0000
+
+ldil $7 , 0x000c ; expected result 12
+
+ldih $7 , 0x0000
+
+addi $6, $5, 0x0004
+
+
+sub $9,$6,$7 ; subtracting the expected address with the recived address 
+
+
+bz correct19 , $9
+
+st.w $29,($28)
+
+bra end19
+
+
+correct19:
+st.w $0,($28)
+
+end19:
+
+; --------------------T.E.S.T 20 -----------------
+; ; test for "SARI" using positive immediate value
+; ------------------------------------------------
+
+test20:     
+ldil $28 ,0x0050 ;Loading the 20th Address
+
+ldih $28 ,0x0010
+
+;expected value is 0x0000 0003
+
+ldil $5 , 0x000c ; 
+
+ldih $5 , 0x0000
+
+ldil $7 , 0x00c8
+
+ldih $7 , 0x0000
+
+
+sari $6, $7, 0x0004
+
+
+sub $8,$6,$5 ; subtracting the expected address with the recived address 
+
+
+bz correct20 , $8
+
+st.w $29,($28)
+
+bra end20
+
+
+correct20:
+st.w $0,($28)
+
+end20:
+
+; --------------------T.E.S.T 21 ------------------
+; ; test for "SARI" using negative immediate value
+; ------------------------------------------------
+
+test21:     
+ldil $28 ,0x0054 ;Loading the 21th Address
+
+ldih $28 ,0x0010
+
+;expected value is 0x0000 0003
+
+ldil $5 , 0x003c ; 
+
+ldih $5 , 0x0000
+
+ldil $7 , 0x000f
+
+ldih $7 , 0x0000
+
+
+sari $6, $7, 0xfffe ;shift arithmatic right by -2
+
+
+sub $8,$6,$5 ; subtracting the expected address with the recived address 
+
+
+bz correct21 , $8
+
+st.w $29,($28)
+
+bra end21
+
+
+correct21:
+st.w $0,($28)
+
+end21:
+
+; --------------------T.E.S.T 22 ------------------
+; ; test for "SARI" using positive immediate value with negative value in the register
+; ------------------------------------------------
+
+test22:     
+ldil $28 ,0x0058 ;Loading the 22th Address
+
+ldih $28 ,0x0010
+
+;expected value is 0x0000 0003
+
+ldil $5 , 0xffff ; 
+
+ldih $5 , 0xffff
+
+ldil $7 , 0xfffc
+
+ldih $7 , 0xffff
+
+
+sari $6, $7, 0x0002 ;shift arithmatic right by 2
+
+
+sub $10,$6,$5 ; subtracting the expected address with the recived address 
+
+
+bz correct22 , $10
+
+st.w $29,($28)
+
+bra end22
+
+
+correct22:
+st.w $0,($28)
+
+end22:
+
+; --------------------T.E.S.T 23 ------------------
+; ; test for "branch" after branch instruction
+; ------------------------------------------------
+
+test23:     
+ldil $28 ,0x005C ;Loading the 23th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0x0000 ; 
+
+ldih $5 , 0x0000
+
+ldil $7 , 0xfffc
+
+ldih $7 , 0xffff
+
+bz test23Firstbranch, $5 ; first branch
+
+test23Firstbranch : bnz correct23, $7 ; immediately a second branch
+
+st.w $29,($28)
+
+bra end23
+
+
+correct23:
+st.w $0,($28)
+
+end23:
+
+; --------------------T.E.S.T 24 ------------------
+; ; test for "ADDI" using negative immediate value
+; ------------------------------------------------
+
+test24:     
+ldil $28 ,0x0060 ;Loading the 19th Address
+
+ldih $28 ,0x0010
+
+
+ldil $5 , 0x0010 ; 
+
+ldih $5 , 0x0000
+
+ldil $7 , 0x000c ; expected result 12
+
+ldih $7 , 0x0000
+
+addi $6, $5, 0xfffc
+
+
+sub $9,$6,$7 ; subtracting the expected address with the recived address 
+
+
+bz correct24 , $9
+
+st.w $29,($28)
+
+bra end24
+
+
+correct24:
+st.w $0,($28)
+
+end24:
+
+; --------------------T.E.S.T 25 ------------------
+; ; test for "Jump After load " using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test25:     
+ldil $28 ,0x0064 ;Loading the 18th Address
+
+ldih $28 ,0x0010
+
+;expected value. REG NOT USED
+ldil $8 , 0xF0ce
+
+ldih $8 , 0xF0ce
+
+ldil $10 , 0xabcd ;loading some garbage data
+
+ldih $10 , 0xdcba
+
+ldil $5 , 0x0000 ; loading the base address
+
+ldih $5 , 0x1100
+
+ldil $10 , 0x0000 ; loading the contents to write at the address
+
+ldih $10 , 0x0000
+
+
+st.w $10,($5) ; saving "0x00000000" at the address $5  i.e 0x11000000
+
+ld.w $7 ,($5) ; loading the data from the address $5  i.e 0x11000000 and content "0x0"
+
+
+bz correct25 , $7
+
+st.w $29,($28)
+
+bra end25
+
+correct25:
+st.w $0,($28)
+
+end25:
+
+
+; --------------------T.E.S.T 26 -----------------
+; positive number to be shifted
+; ; test for "SARI" using positive and negative immediate value
+; ; also for multiple sari in a row
+; ------------------------------------------------
+
+test26:     
+ldil $28 ,0x0068 ;Loading the 20th Address
+
+ldih $28 ,0x0010
+
+;expected value is 0x3000 0000 after a number of sari with right and negative shifts
+
+ldil $5 , 0x0000 ; 
+
+ldih $5 , 0x3000
+
+ldil $7 , 0x00c8
+
+ldih $7 , 0x0000
+
+
+sari $6, $7, 0x0003
+
+
+sari $6, $6, 0x0001
+
+
+;shift 2 left
+sari $6, $6, 0xfffe
+
+
+;shift 24 left
+sari $6, $6, 0xffe8
+
+
+sub $8,$6,$5 ; subtracting the expected address with the recived address 
+
+
+bz correct26 , $8
+
+st.w $29,($28)
+
+bra end26
+
+
+correct26:
+st.w $0,($28)
+
+end26:
+
+
+; --------------------T.E.S.T 26 -----------------
+; ; negative number to be shifted
+; ; test for "SARI" using positive and negative immediate value
+; ; also for multiple sari in a row
+; ------------------------------------------------
+
+test27:     
+ldil $28 ,0x006c ;Loading the 27th Address
+
+ldih $28 ,0x0010
+
+;NOT expected value is 0x3000 0000 after a number of sari with right and negative shifts
+;BUT STILL WE GET THIS VALUS
+;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ldil $5 , 0x0000 ; 
+
+ldih $5 , 0x3000
+
+ldil $7 , 0x00c8
+
+ldih $7 , 0xffff
+
+
+sari $6, $7, 0x0003
+
+
+sari $6, $6, 0x0001
+
+
+;shift 2 left
+sari $6, $6, 0xfffe
+
+
+; shift 24 left
+sari $6, $6, 0xffe8
+
+
+sub $8,$6,$5 ; subtracting the expected address with the recived address 
+
+
+bz correct27 , $8
+
+st.w $29,($28)
+
+bra end27
+
+
+correct27:
+st.w $0,($28)
+
+end27:
+
+
+;--------------------T.E.S.T 28 ------------------
+; ; test for "SHIFTING LEFT" SAL using reg 5,6,7,8,9
+; ; Using SAL with -ve shifting 
+;------------------------------------------------
+
+test28:     
+ldil $28 ,0x0070 ;Loading the 28th Address
+
+ldih $28 ,0x0010
+
+ldil $5 , 0xFFFA ; loading -6
+
+ldih $5 , 0xFFFF
+
+ldil $6 , 0x001c ; loading -ve 6
+
+ldih $6 , 0x0000
+
+;expected value is -1
+ldil $8 , 0x0000
+
+ldih $8 , 0xa000
+
+sal $7,$5,$6 ;shifitng $5 as much as the value in 6 i.e -ve6
+
+
+sub $9,$7,$8
+
+
+bz correct28 , $9
+
+st.w $29,($28)
+
+
+bra end28
+
+
+correct28:
+st.w $0,($28)
+
+
+end28:
+
+
+
+; --------------------T.E.S.T 29 ------------------
+; ; test for "Jump After load " using reg 5,6,7,8,9
+; ------------------------------------------------
+
+test29:     
+ldil $28 ,0x0074 ;Loading the 18th Address
+
+ldih $28 ,0x0010
+
+;expected value. REG NOT USED
+ldil $8 , 0xF0ce
+
+ldih $8 , 0xF0ce
+
+ldil $10 , 0xabcd ;loading some garbage data
+
+ldih $10 , 0xdcba
+
+ldil $5 , 0x0000 ; loading the base address
+
+ldih $5 , 0x1100
+
+ldil $10 , 0x0000 ; loading the contents to write at the address
+
+ldih $10 , 0x0000
+
+
+st.w $10,($5) ; saving "0x00000000" at the address $5  i.e 0x11000000
+
+ld.w $7 ,($5) ; loading the data from the address $5  i.e 0x11000000 and content "0x0"
+
+
+bz correct29 , $7
+
+st.w $29,($28)
+
+bra end29
+nop
+
+correct29:
+st.w $0,($28)
+
+end29:
+
