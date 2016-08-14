@@ -1,0 +1,57 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use IEEE.std_logic_unsigned.all;
+use work.types.all;
+
+entity IF_unit is
+    port (
+        clk : in std_logic;
+        res_and_stall : in control;
+		    IF_to_mem : out memory_in;
+		    mem_to_IF : in memory_out;
+		    branch_deci : in branch;
+		    stall_req : out std_logic;
+		    fetched_inst : out instruction;
+        hazard_detect_load : in std_logic
+        );
+end entity IF_unit;
+
+architecture behaviour of IF_unit is
+  signal pc_to_mem, hazard_pc : Tadr := x"00000000";
+
+begin 
+  --*******************IF_to_mem*************************
+  IF_to_mem.adr <= branch_deci.target when branch_deci.branch = '1' else
+                   pc_to_mem;
+  IF_to_mem.we <= '0';                 
+  IF_to_mem.enable <= '1';
+  
+  --******************stall request*********************
+  stall_req <= not mem_to_IF.rdy;
+  
+  clked_process : process(clk) 
+  begin  
+	if res_and_stall.res = '1' then
+		fetched_inst <= (x"00000000", x"00000000", '0');
+	else 
+		if rising_edge (clk) then
+			if res_and_stall.stall = '0' and mem_to_IF.rdy = '1' then
+			  hazard_pc <= pc_to_mem;
+				fetched_inst.valid <= '1';
+				fetched_inst.ir <= mem_to_IF.data;
+				if branch_deci.branch = '1' then
+					fetched_inst.pc <= branch_deci.target;
+					pc_to_mem <= branch_deci.target + 4;
+				else
+					fetched_inst.pc <= pc_to_mem;
+					if hazard_detect_load = '0' then
+					 pc_to_mem <= pc_to_mem + 4;
+					end if; 
+				end if;
+			end if;
+		end if;
+	end if;
+  end process clked_process;
+end architecture behaviour;
+    

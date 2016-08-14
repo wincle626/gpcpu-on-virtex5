@@ -1,0 +1,39 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use IEEE.std_logic_unsigned.all;
+use work.types.all;
+
+entity write_fifo is
+generic(
+SIZE : natural := 4); -- FIFO address width
+port(
+clk : in Std_Logic;
+res : in Std_Logic;
+cpu_from : in memory_in;
+cpu_to : out memory_out;
+mem_to : out memory_in;
+mem_from : in memory_out);
+end write_fifo;
+
+
+architecture behaviour of write_fifo is
+	subtype fifo_range is natural range 3 downto 0;
+	type data_wbf is array(fifo_range) of Tdata;
+	type addr_wbf is array(fifo_range) of Tadr;
+	signal data_wr_bf : data_wbf := (others => (others => '0'));
+	signal addr_wr_bf : addr_wbf := (others => (others => '0'));
+	signal count : std_logic_vector(1 downto 0) := "00";
+
+begin 
+
+write_process : process(cpu_from, mem_from.enable)
+begin
+	if cpu_from.we = '1' and cpu_from.enable = '1' and count /= "11" then
+		data_wr_bf(to_integer(unsigned(count))) <= cpu_from.data;
+		addr_wr_bf(to_integer(unsigned(count))) <= cpu_from.adr;
+		count <= count + 1;
+	end if;
+end process;
+end architecture behaviour;
+    
